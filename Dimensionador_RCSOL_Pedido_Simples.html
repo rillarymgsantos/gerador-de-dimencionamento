@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dimensionador de Usinas – RCSOL</title>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--tx:#1b2430;--mut:#667385;--bd:#dde3ea;--ac:#f59e0b;--ok:#15803d;--okbg:#e7f6ec;--er:#b91c1c;--erbg:#fdeaea;--wn:#92400e;--wnbg:#fef3c7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--card:#1b222b;--tx:#e8edf3;--mut:#93a1b3;--bd:#2c3744;--ac:#fbbf24;--ok:#4ade80;--okbg:#14301f;--er:#f87171;--erbg:#3a1a1a;--wn:#fcd34d;--wnbg:#3a2f12;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161c;--card:#1b222b;--tx:#e8edf3;--mut:#93a1b3;--bd:#2c3744;--ac:#fbbf24;--ok:#4ade80;--okbg:#14301f;--er:#f87171;--erbg:#3a1a1a;--wn:#fcd34d;--wnbg:#3a2f12;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0}h1 span{color:var(--ac)}
+.sub{color:var(--mut);font-size:14px;margin:2px 0 12px}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer}
+.tab.on{background:var(--ac);color:#1b2430;border-color:var(--ac);font-weight:600}
+.pg{display:none}.pg.on{display:block}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px}h3{font-size:14px;margin:14px 0 8px;color:var(--mut)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.eq{display:grid;grid-template-columns:24px minmax(0,1fr) 108px 70px 35px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd)}
+.eq:last-child{border:0}
+.eq input[type=checkbox]{width:20px;height:20px;padding:0}
+.eq small{color:var(--mut)}
+.eq input[type=number]{padding:6px}
+.eq-name{min-width:0}.eq-name small{display:block}.eq-num label{margin:0 0 3px;font-size:11px}.eq-reset{padding:5px;border:1px solid var(--bd);background:var(--bg);color:var(--mut);border-radius:7px;cursor:pointer}
+.hint{display:block;font-size:11px;color:var(--mut);margin-top:4px}
+.adjust{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:6px}
+.adjust button{border:1px solid var(--bd);border-radius:7px;padding:5px 11px;background:var(--bg);color:var(--tx);cursor:pointer;font:inherit}
+.adjust button:disabled{opacity:.35;cursor:default}
+.adjust .reset{font-size:13px;color:var(--mut)}
+.selects{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
+@media(max-width:610px){.eq{grid-template-columns:24px 1fr 84px 68px;gap:6px}.eq-name{grid-column:2/5}.eq .eq-check{grid-row:1}.eq .eq-rate{grid-row:2;grid-column:2}.eq .eq-qty{grid-row:2;grid-column:3}.eq .eq-reset{grid-row:2;grid-column:4;justify-self:end}.eq-num label{font-size:10px}}
+.res{border:2px solid var(--ac)}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:8px}
+.k{background:var(--bg);border-radius:10px;padding:10px 12px}
+.k b{display:block;font-size:20px}.k span{font-size:12px;color:var(--mut)}
+.al,.wn,.nt{border-radius:10px;padding:10px 12px;margin-top:10px;font-size:14px}
+.al{background:var(--erbg);color:var(--er);border:1px solid var(--er);font-weight:600}
+.wn{background:var(--wnbg);color:var(--wn);border:1px solid var(--wn);font-weight:600}
+.nt{background:var(--bg);color:var(--mut)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+tr.o{cursor:pointer}tr.sel{background:var(--okbg)}tr.bad{color:var(--er)}
+.det{font-size:13px;color:var(--mut);margin-top:10px}
+.cp{margin-top:12px;border:1px dashed var(--bd);border-radius:10px;padding:12px;background:var(--bg)}
+.cp textarea{width:100%;min-height:110px;border:0;background:transparent;color:var(--tx);font:inherit;resize:vertical}
+button.b{background:var(--ac);color:#1b2430;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="w">
+<h1><span>RC</span>SOL · Dimensionador de Usinas</h1>
+<p class="sub">Pré-dimensionamento para solicitar orçamento de equipamentos e instalação.</p>
+<div class="tabs"><button class="tab on" id="t1" onclick="tab(1)">Dimensionamento</button><button class="tab" id="t2" onclick="tab(2)">Configurações</button></div>
+
+<div class="pg on" id="p1">
+<div class="c">
+<h2>1. Consumo do cliente (kWh/mês)</h2>
+<div class="g">
+<div><label>Maior consumo</label><input id="m1" type="number" min="0" step="any" value="0"></div>
+<div><label>2º maior consumo</label><input id="m2" type="number" min="0" step="any" value="0"></div>
+</div>
+</div>
+
+<div class="c">
+<h2>2. Acréscimo de consumo (opcional)</h2>
+<p class="det" style="margin:0 0 10px">Marque somente equipamentos novos ou o aumento de uso que ainda não aparece na conta. Os consumos por unidade podem ser editados neste orçamento.</p>
+<div id="eqs"></div>
+<div class="g" style="margin-top:10px">
+<div><label>Outro acréscimo manual (kWh/mês)</label><input id="man" type="number" min="0" step="any" value="0"></div>
+</div>
+</div>
+
+<div class="c">
+<h2>3. Informações opcionais da instalação</h2>
+<div class="g">
+<div><label for="roof">Tipo de telhado / suporte para o orçamento</label><select id="roof"><option value="">Selecione o tipo de telhado</option><option>Fibrocimento</option><option>Telha cerâmica</option><option>Metálico</option><option>Sanduíche</option><option>Laje</option><option>Solo</option><option>Outro</option></select></div>
+<div><label>Distância aproximada dos módulos ao inversor (m)</label><input id="dist" type="number" min="0" step="any" value="" placeholder="Opcional"></div>
+</div>
+<p class="det">Usado somente como referência para o levantamento de materiais; não altera a geração.</p>
+</div>
+
+<div class="c">
+<h2>Comparativo por potência de módulo</h2>
+<div class="tw"><table><thead><tr><th>Módulo</th><th>Qtd.</th><th>kWp real</th><th>Inversor sugerido</th><th>DC/AC</th><th>Geração (kWh/mês)</th></tr></thead><tbody id="tb"></tbody></table></div>
+<p class="det">Clique numa linha para escolher a potência do módulo. O cálculo inicial arredonda a quantidade para cima; você pode ajustá-la no resultado.</p>
+</div>
+
+<div class="c res">
+<h2>Resultado</h2>
+<div id="out"></div>
+</div>
+</div>
+
+<div class="pg" id="p2">
+<div class="c">
+<h2>Valores fixos</h2>
+<div class="g">
+<div><label>Perdas de geração (%)</label><input id="perd" type="number" min="0" max="99" step="any" value="20"></div>
+<div><label>Irradiação – HSP (kWh/m²/dia)</label><input id="hsp" type="number" min="0.1" step="any" value="5.68"></div>
+<div><label>Equipamentos com faixa de consumo</label><select id="faixa"><option value="med">Valor médio</option><option value="min">Mínimo</option><option value="max">Máximo</option></select></div>
+<div><label>Margem adicional de geração (%) — opcional</label><input id="margin" type="number" min="0" max="100" step="any" value="0"></div>
+<div><label>Avisar pouca folga abaixo de (%)</label><input id="alerta" type="number" min="0" max="100" step="any" value="5"></div>
+</div>
+</div>
+<div class="c">
+<h2>Configuração do projeto</h2>
+<div class="g">
+<div><label>Inversores comerciais (kW)</label><input id="invs" value="2; 3; 4; 5; 6; 7,3; 7,5"><small class="hint">Separe por ponto e vírgula; aceite vírgula decimal.</small></div>
+<div><label>Sobredimensionamento DC/AC de referência (%)</label><input id="over" type="number" min="0" step="any" value="20"></div>
+<div><label>Inversor até (%) acima da potência dos módulos</label><input id="acoversize" type="number" min="0" max="30" step="any" value="15"><small class="hint">Permite indicar inversor comercial ligeiramente maior (ex.: 3 kW para 2,8 kWp). Apenas para pré-orçamento.</small></div>
+<div><label>Módulos (W)</label><input id="mods" value="700; 710; 715; 725; 730"></div>
+<div><label>Potência AC máxima de referência (kW)</label><input id="acmax" type="number" min="0" step="any" value="7.5"><small class="hint">0 = sem limite comercial. Não confirma aprovação na concessionária.</small></div>
+</div>
+<h3>Strings para pré-orçamento</h3>
+<p class="det">Padrão inicial para orçamento: 1 string de 0 a 5 módulos; 2 strings de 6 a 12 módulos; acima de 12 módulos, definir manualmente. Preferir MPPTs independentes quando disponíveis. A configuração elétrica final depende dos modelos fornecidos.</p>
+</div>
+</div>
+</div>
+
+<script>
+// Estimativas comerciais de consumo mensal por equipamento (kWh por unidade).
+// Alterações feitas na tela não mudam estes valores de referência.
+const EQ=[
+ ["Ar-condicionado 9.000 BTUs","8 h/dia",150,150],
+ ["Ar-condicionado 12.000 BTUs","8 h/dia",200,200],
+ ["Ar-condicionado 18.000 BTUs","8 h/dia",300,300],
+ ["Ar-condicionado 24.000 BTUs","8 h/dia",440,440],
+ ["Ar-condicionado 30.000 BTUs","8 h/dia",550,550],
+ ["Fogão de indução","1 h/dia",45,90],
+ ["Bomba de piscina ½ CV","4 h/dia",70,90],
+ ["Bomba de piscina 1 CV","4 h/dia",120,150],
+ ["Freezer horizontal","24 h/dia*",40,70],
+ ["Freezer vertical","24 h/dia*",50,90],
+ ["Chuveiro 5.500 W","15 min/dia",41,41],
+ ["Chuveiro 5.500 W","30 min/dia",83,83],
+ ["Geladeira duplex","24 h/dia*",40,70],
+ ["Forno elétrico","1 h/dia",45,60],
+ ["Aquecedor de piscina (bomba de calor)","70 h/mês",160,160]
+];
+const $=id=>document.getElementById(id);
+const nf=(v,d=2)=>Number.isFinite(v)?v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d}):"—";
+const num=id=>{const raw=String($(id).value).trim();return raw===""?NaN:Number(raw.replace(",","."))};
+const good=(x)=>Number.isFinite(x);
+// Aceita "7,3; 7,5" ou listas legadas como "2, 3, 4, 7.5".
+function parseList(raw){
+ const s=String(raw).trim();if(!s)return [];
+ let chunks;
+ if(s.includes(";"))chunks=s.split(/[;\n]+/);
+ else if(/,\s/.test(s))chunks=s.split(/,\s+|\s+/);
+ else if((s.match(/,/g)||[]).length>1)chunks=s.split(",");
+ else chunks=s.split(/\s+/);
+ const vals=chunks.map(x=>Number(x.trim().replace(",",".")));
+ return vals.every(x=>good(x)&&x>0)?[...new Set(vals)].sort((a,b)=>a-b):[];
+}
+let chosen=null,qtyOverride=null,invSel="auto",strSel="auto",currentQty=0;
+const customRates=EQ.map(()=>false);
+function tab(n){[1,2].forEach(i=>{$("p"+i).classList.toggle("on",i===n);$("t"+i).classList.toggle("on",i===n)})}
+function defaultRate(e){const f=$("faixa").value;return f==="min"?e[2]:f==="max"?e[3]:(e[2]+e[3])/2}
+$("eqs").innerHTML=EQ.map((e,i)=>`<div class="eq">
+ <input class="eq-check" type="checkbox" id="c${i}" aria-label="Incluir ${e[0]}">
+ <div class="eq-name">${e[0]} <small>${e[1]} · referência: ${e[2]===e[3]?e[2]:e[2]+"–"+e[3]} kWh/mês</small></div>
+ <div class="eq-num eq-rate"><label for="r${i}">kWh/un./mês</label><input type="number" id="r${i}" min="0" step="any" value="${defaultRate(e)}"></div>
+ <div class="eq-num eq-qty"><label for="q${i}">Qtd.</label><input type="number" id="q${i}" min="1" step="1" value="1"></div>
+ <button class="eq-reset" type="button" title="Restaurar consumo padrão" aria-label="Restaurar consumo de ${e[0]}" onclick="resetRate(${i})">↺</button>
+</div>`).join("");
+function resetRate(i){customRates[i]=false;$("r"+i).value=defaultRate(EQ[i]);calc()}
+function syncDefaultRates(){EQ.forEach((e,i)=>{if(!customRates[i])$("r"+i).value=defaultRate(e)});calc()}
+function setModule(p){chosen=p;qtyOverride=null;invSel="auto";strSel="auto";calc()}
+function setQty(delta){qtyOverride=Math.max(1,currentQty+delta);calc()}
+function resetQty(){qtyOverride=null;calc()}
+function autoInv(real,invs,over,maxAC,acoversize){
+ const ref=real/(1+over);
+ // Referência de DC/AC: potência AC mínima. Permite também uma pequena folga
+ // acima da potência DC para não descartar inversores comerciais próximos.
+ // Não é validação de potência CC máxima, MPPT, corrente, tensão ou clipping.
+ const maxBySize=real*(1+acoversize);
+ const candidates=invs.filter(k=>k>=ref-1e-9&&k<=maxBySize+1e-9&&(maxAC<=0||k<=maxAC+1e-9));
+ return {ref,inv:candidates.length?candidates[0]:null};
+}
+function suggestedStrings(n){return n<=5?1:n<=12?2:null}
+function stringDistribution(n,k){if(!k||k>n)return "";return Array.from({length:k},(_,i)=>Math.floor(n/k)+(i<n%k?1:0)).join(" + ")}
+function copyTxt(){
+ const t=$("cpt"),b=$("cb");
+ const fallback=()=>{t.focus();t.select();try{document.execCommand("copy");b.textContent="Copiado"}catch{b.textContent="Selecione e copie"}};
+ if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t.value).then(()=>b.textContent="Copiado").catch(fallback);
+ else fallback();
+ setTimeout(()=>{if($("cb"))$("cb").textContent="Copiar"},1500);
+}
+function showError(msg){$("out").innerHTML=`<div class="al">${msg}</div>`;$("tb").innerHTML=""}
+function calc(){
+ const m1=num("m1"),m2=num("m2"),perd=num("perd"),hsp=num("hsp"),man=num("man"),margin=num("margin"),alerta=num("alerta"),over=num("over")/100,acoversize=num("acoversize")/100,maxAC=num("acmax"),dist=$("dist").value===""?null:num("dist");
+ if(![m1,m2,perd,hsp,man,margin,alerta,over,acoversize,maxAC].every(good)||m1<0||m2<0||perd<0||perd>=100||hsp<=0||man<0||margin<0||margin>100||alerta<0||alerta>100||over<0||over>2||acoversize<0||acoversize>0.30||maxAC<0||(dist!==null&&(!good(dist)||dist<0))){showError("Revise os dados: consumo não negativo, perdas entre 0 e 99,9%, HSP maior que zero e porcentagens válidas.");return}
+ const invs=parseList($("invs").value),mods=parseList($("mods").value);
+ if(!mods.length||!invs.length){showError("Informe listas válidas de módulos e inversores. Ex.: inversores 2; 3; 5; 7,3; 7,5.");return}
+ const base=(m1+m2)/2;
+ let add=man;const sel=[];
+ if(man>0)sel.push(`Manual: ${nf(man)} kWh`);
+ for(let i=0;i<EQ.length;i++){
+   if(!$("c"+i).checked)continue;
+   const q=num("q"+i),r=num("r"+i);
+   if(!good(q)||!Number.isInteger(q)||q<1||!good(r)||r<0){showError(`Revise a quantidade e o consumo mensal de ${EQ[i][0]}.`);return}
+   const extra=r*q;add+=extra;sel.push(`${EQ[i][0]}: ${q} × ${nf(r)} = ${nf(extra)} kWh`);
+ }
+ const total=base+add;
+ if(!(total>0)){showError("Preencha um consumo maior que zero para calcular.");return}
+ const factor=hsp*30*(1-perd/100),kwp=total/factor,target=kwp*(1+margin/100);
+ const rows=mods.map(p=>{
+   const suggestedQty=Math.max(1,Math.ceil(target*1000/p-1e-9));
+   const n=(p===chosen&&qtyOverride!==null)?qtyOverride:suggestedQty;
+   const real=n*p/1000, ai=autoInv(real,invs,over,maxAC,acoversize);
+   return {p,n,suggestedQty,real,inv:ai.inv,ref:ai.ref,dcac:ai.inv?real/ai.inv:null,gen:real*factor,diff:real-target};
+ });
+ const feasible=rows.filter(r=>r.inv!==null),pool=feasible.length?feasible:rows;
+ const rec=pool.slice().sort((a,b)=>Math.abs(a.diff)-Math.abs(b.diff)||a.p-b.p)[0];
+ if(!rows.some(r=>r.p===chosen)){chosen=rec.p;qtyOverride=null}
+ const s=rows.find(r=>r.p===chosen);
+ currentQty=s.n;
+ const auto=s.inv,inv=invSel==="auto"?auto:Number(invSel);
+ const hasInv=inv!==null&&good(inv)&&inv>0;
+ const dcac=hasInv?s.real/inv:null;
+ const gen=s.gen,dif=gen-total,cov=gen/total*100;
+ $("tb").innerHTML=rows.map(r=>`<tr class="o ${r.p===chosen?"sel":""} ${r.inv===null?"bad":""}" onclick="setModule(${r.p})"><td>${nf(r.p,0)} W${r.p===rec.p?" ★":""}</td><td>${r.n}${r.n!==r.suggestedQty?" (ajuste)":""}</td><td>${nf(r.real)}</td><td>${r.inv===null?"A definir":nf(r.inv,1)+" kW"}</td><td>${r.dcac===null?"—":nf(r.dcac*100,1)+"%"}</td><td>${nf(r.gen,0)}</td></tr>`).join("");
+ const strAuto=suggestedStrings(s.n);
+ if(strSel!=="auto"&&Number(strSel)>s.n)strSel="auto";
+ const str=strSel==="auto"?strAuto:Number(strSel);
+ const strText=str?`${str} string${str>1?"s":""} (${stringDistribution(s.n,str)} módulos)`:"Definir";
+ const optsInv=`<option value="auto">${auto===null?"Automático (a definir)":"Automático ("+nf(auto,1)+" kW)"}</option>`+
+   invs.map(k=>`<option value="${k}" ${invSel!=="auto"&&Math.abs(Number(invSel)-k)<1e-9?"selected":""}>${nf(k,1)} kW${maxAC>0&&k>maxAC?" (acima da referência)":""}</option>`).join("");
+ const optsStr=`<option value="auto" ${strSel==="auto"?"selected":""}>${strAuto?"Automático ("+strAuto+")":"Automático (definir)"}</option>`+
+   Array.from({length:Math.min(6,s.n)},(_,i)=>i+1).map(k=>`<option value="${k}" ${strSel!=="auto"&&Number(strSel)===k?"selected":""}>${k} string${k>1?"s":""}</option>`).join("");
+ let h=`<div class="big">
+ <div class="k"><span>Módulos</span><b>${s.n} × ${nf(s.p,0)} W</b></div>
+ <div class="k"><span>Potência necessária</span><b>${nf(kwp)} kWp</b></div>
+ <div class="k"><span>Potência dos módulos</span><b>${nf(s.real)} kWp</b></div>
+ <div class="k"><span>Referência de inversor</span><b>${nf(s.ref)} kW</b></div>
+ <div class="k"><span>Inversor escolhido</span><b>${hasInv?nf(inv,1)+" kW":"A definir"}</b></div>
+ <div class="k"><span>Relação DC/AC</span><b>${dcac===null?"—":nf(dcac*100,1)+"%"}</b></div>
+ </div>
+ <div style="margin-top:12px"><label>Quantidade de módulos — ajuste manual</label><div class="adjust">
+ <button type="button" onclick="setQty(-1)" ${s.n<=1?"disabled":""} aria-label="Retirar módulo">−</button>
+ <strong>${s.n} módulo${s.n!==1?"s":""}</strong>
+ <button type="button" onclick="setQty(1)" aria-label="Adicionar módulo">+</button>
+ <button type="button" class="reset" onclick="resetQty()">Restaurar automático (${s.suggestedQty})</button>
+ </div></div>
+ <div class="selects"><div><label for="invsel">Ajustar inversor</label><select id="invsel" onchange="invSel=this.value;calc()">${optsInv}</select></div>
+ <div><label for="strsel">Strings para orçamento</label><select id="strsel" onchange="strSel=this.value;calc()">${optsStr}</select></div></div>
+ <p class="det">${str?`Distribuição preliminar: ${stringDistribution(s.n,str)} módulos, preferencialmente em MPPTs independentes.`:"Acima de 12 módulos: defina manualmente a quantidade de strings."} A compatibilidade será confirmada após a cotação dos modelos.</p>
+ <h3>Consumo x geração</h3>
+ <div class="big">
+ <div class="k"><span>Consumo previsto</span><b>${nf(total,0)} kWh/mês</b></div>
+ <div class="k"><span>Geração estimada</span><b>${nf(gen,0)} kWh/mês</b></div>
+ <div class="k"><span>Diferença</span><b>${dif>=0?"+":"−"}${nf(Math.abs(dif),0)} kWh</b></div>
+ <div class="k"><span>Cobertura do consumo</span><b>${nf(cov,1)}%</b></div>
+ <div class="k"><span>Strings para orçamento</span><b>${str===null?"A definir":str}</b></div>
+ </div>`;
+ if(gen<total-1e-9)h+=`<div class="al">Geração estimada menor que o consumo previsto (${nf(gen,0)} contra ${nf(total,0)} kWh/mês).</div>`;
+ else if(dif/total*100<alerta-1e-9)h+=`<div class="wn">Pouca folga de geração: ${nf(dif/total*100,1)}% (alerta configurado em ${nf(alerta,1)}%).</div>`;
+ if(s.real<target-1e-9)h+=`<div class="wn">A quantidade ajustada ficou abaixo da meta de ${nf(target)} kWp${margin>0?", que inclui "+nf(margin,1)+"% de margem adicional":""}.</div>`;
+ if(!hasInv)h+=`<div class="wn">Nenhum inversor cadastrado atende aos critérios automáticos (DC/AC, limite comercial e tolerância de potência AC). Consulte o fornecedor ou ajuste a escolha manualmente.</div>`;
+ else {
+   if(dcac>1+over+1e-9)h+=`<div class="wn">Sobredimensionamento DC/AC de ${nf((dcac-1)*100,1)}%, acima da referência de ${nf(over*100,1)}%. Confirmar compatibilidade e possível clipping.</div>`;
+   if(dcac>1.30)h+=`<div class="al">A relação DC/AC supera 130%. A geração teórica exibida pode não ser atingida com esse inversor; solicitar simulação ao fornecedor.</div>`;
+   if(dcac<1){
+     const pct=(inv/s.real-1)*100;
+     if(pct<=acoversize*100+1e-9)h+=`<div class="nt">Inversor de ${nf(inv,1)} kW (${nf(pct,1)}% acima da potência dos módulos): sugestão preliminar para cotação, sujeita à confirmação do modelo.</div>`;
+     else h+=`<div class="wn">Inversor escolhido manualmente está ${nf(pct,1)}% acima da potência dos módulos, ultrapassando a tolerância automática de ${nf(acoversize*100,1)}%. Confirmar a escolha.</div>`;
+   }
+   if(maxAC>0&&inv>maxAC+1e-9)h+=`<div class="wn">O inversor selecionado excede o limite AC de referência para cotação (${nf(maxAC,1)} kW).</div>`;
+ }
+ if(!str)h+=`<div class="wn">Defina a quantidade de strings para estimar o material de instalação.</div>`;
+ if(str&&str>2)h+=`<div class="wn">Mais de 2 strings: verificar se o inversor ofertado possui MPPTs independentes suficientes ou se a conexão pretendida é compatível.</div>`;
+ if(dist!==null&&dist>0&&str){
+   const cabos=2*dist*str*1.10;
+   h+=`<div class="nt">Estimativa inicial de cabo CC: aproximadamente <b>${nf(cabos,0)} m</b> de condutores no total (ida + volta por string, com 10% de reserva). Confirmar percurso real na instalação.</div>`;
+ }
+ h+=`<div class="nt">Estimativa para solicitar orçamento, não é validação elétrica. Perdas de ${nf(perd,1)}% aplicadas uma vez; a geração não considera clipping específico nem diferenças de orientação/sombra entre strings. A concessionária e o fornecedor devem confirmar as condições de conexão e compatibilidade.</div>`;
+ const invText=hasInv?nf(inv,1).replace(/,0$/,'')+' kW':'a definir';
+ const roof=$("roof").value;
+ const supports={
+  'Fibrocimento':'telhado de fibrocimento',
+  'Telha cerâmica':'telhado de telha cerâmica',
+  'Metálico':'telhado metálico',
+  'Sanduíche':'telhado sanduíche',
+  'Laje':'laje',
+  'Solo':'solo',
+  'Outro':'estrutura a definir'
+ };
+ const supportLine='Suporte para '+(supports[roof]||'telhado a definir')+'.';
+ const stringLine=str?`Material para ${str} string${str===1?'':'s'}.`:'Material para strings a definir.';
+ const quote=`Usina de ${nf(s.real)} kWp com ${s.n} módulos de ${nf(s.p,0)} W.\nInversor: ${invText}.\n${stringLine}\n${supportLine}`;
+ h+=`<div class="cp"><label>Texto simples para solicitar orçamento</label><textarea id="cpt" readonly></textarea><button class="b" id="cb" onclick="copyTxt()">Copiar</button></div>`;
+ h+=`<p class="det">Consumo-base: (${nf(m1)} + ${nf(m2)}) ÷ 2 = ${nf(base)} kWh · Acréscimos: ${nf(add)} kWh · Total: ${nf(total)} kWh/mês · ${nf(total)} ÷ (${nf(hsp)} × 30 × ${nf(1-perd/100)}) = ${nf(kwp,3)} kWp${margin>0?" · Meta com margem: "+nf(target,3)+" kWp":""}${sel.length?"<span id=\"detailEq\"></span>":""}</p>`;
+ $("out").innerHTML=h;
+ $("cpt").value=quote;
+ if(sel.length){$("detailEq").textContent=" · Acréscimos: "+sel.join("; ")}
+}
+$("faixa").addEventListener("change",syncDefaultRates);
+EQ.forEach((e,i)=>$("r"+i).addEventListener("input",()=>customRates[i]=true));
+document.querySelectorAll("input,select").forEach(input=>{
+ if(input.id==="faixa")return;
+ input.addEventListener(input.tagName==="SELECT"?"change":"input",calc);
+});
+calc();
+</script>
+</body>
+</html>
